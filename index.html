@@ -6,6 +6,8 @@
 
 <title>Octopus Tracker</title>
 
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+
 <link rel="manifest" href="manifest.json">
 
 <meta name="theme-color" content="#100030">
@@ -88,15 +90,16 @@ input {
 
 <!-- DASHBOARD -->
 <div id="dashboard">
+    <h5 id="currentRegion"></h5>
 
     <div class="card">
-        <div>⚡ Electricity</div>
+        <div>⚡ Electricity <span id="currentElecProduct"></span></div>
         <div class="price" id="elecPrice">-</div>
         <div class="small" id="elecTomorrow"></div>
     </div>
 
     <div class="card">
-        <div>🔥 Gas</div>
+        <div>🔥 Gas <span id="currentGasProduct"></span></div>
         <div class="price" id="gasPrice">-</div>
         <div class="small" id="gasTomorrow"></div>
     </div>
@@ -112,13 +115,39 @@ input {
         <h3>Settings</h3>
 
         <label>Region Code</label>
-        <input id="region" />
+        <input id="region" list="region-list" />
+
+        <datalist id="region-list">
+            <option value="A">A – Eastern England</option>
+            <option value="B">B – East Midlands</option>
+            <option value="C">C – London</option>
+            <option value="D">D – Merseyside and Northern Wales</option>
+            <option value="E">E – West Midlands</option>
+            <option value="F">F – North Eastern England</option>
+            <option value="G">G – North Western England</option>
+            <option value="H">H – Southern England</option>
+            <option value="J">J – South Eastern England</option>
+            <option value="K">K – Southern Wales</option>
+            <option value="L">L – South Western England</option>
+            <option value="M">M – Yorkshire</option>
+            <option value="N">N – Southern Scotland</option>
+            <option value="P">P – Northern Scotland</option>
+        </datalist>
 
         <label>Electricity Product</label>
-        <input id="elecProduct" />
+        <input id="elecProduct" list="product-list" />
 
         <label>Gas Product</label>
-        <input id="gasProduct" />
+        <input id="gasProduct" list="product-list" />
+
+        <datalist id="product-list">
+            <option value="SILVER-26-04-01">
+            <option value="OE-FIX-12M-26-03-03">12M Fixed March 2026 v1</option>
+            <option value="SILVER-25-09-02">Tracker September 2025v1</option>
+            <option value="SILVER-25-04-15">
+            <option value="SILVER-25-04-11">
+            <option value="SILVER-24-12-31">
+        </datalist>
 
         <button onclick="saveSettings()">Save</button>
         <button onclick="resetSettings()">Reset</button>
@@ -220,7 +249,19 @@ async function fetchData(type, product) {
     }
 }
 
+
 async function refresh() {
+
+    const regionElement = document.querySelector(`#region-list option[value="${appSettings.region}"]`);
+    currentRegion.textContent = "Region: " + regionElement.textContent;
+
+    const elecElement = document.querySelector(`#product-list option[value="${appSettings.electricityProduct}"]`);
+//    const currentElecProduct = document.getElementById('currentElecProduct');
+    currentElecProduct.textContent = `(${elecElement.textContent})`;
+
+    const gasElement = document.querySelector(`#product-list option[value="${appSettings.gasProduct}"]`);
+//    const currentGasProduct = document.getElementById('currentGasProduct');
+    currentGasProduct.textContent = `(${gasElement.textContent})`;
 
     const elec = await fetchData("electricity", appSettings.electricityProduct);
     const gas = await fetchData("gas", appSettings.gasProduct);
