@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<title>Octopus Tracker</title>
+
+<link rel="manifest" href="manifest.json">
+
+<meta name="theme-color" content="#100030">
+
+<style>
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #100030;
+    color: white;
+}
+
+header {
+    padding: 16px;
+    font-size: 18px;
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+button {
+    background: #2a1b5a;
+    border: none;
+    color: white;
+    padding: 8px 10px;
+    border-radius: 8px;
+}
+
+.container {
+    padding: 16px;
+}
+
+.card {
+    background: #1b1040;
+    padding: 16px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+}
+
+.price {
+    font-size: 32px;
+    font-weight: bold;
+}
+
+.small {
+    font-size: 13px;
+    opacity: 0.8;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    margin-top: 6px;
+    margin-bottom: 12px;
+    border-radius: 8px;
+    border: none;
+}
+
+.hidden { display: none; }
+
+.nav {
+    display: flex;
+    gap: 8px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <div>Octopus Tracker</div>
+    <div class="nav">
+        <button onclick="showPage('dashboard')">Home</button>
+        <button onclick="showPage('settings')">Settings</button>
+    </div>
+</header>
+
+<div class="container">
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+
+    <div class="card">
+        <div>⚡ Electricity</div>
+        <div class="price" id="elecPrice">-</div>
+        <div class="small" id="elecTomorrow"></div>
+    </div>
+
+    <div class="card">
+        <div>🔥 Gas</div>
+        <div class="price" id="gasPrice">-</div>
+        <div class="small" id="gasTomorrow"></div>
+    </div>
+
+    <button onclick="refresh()">Refresh</button>
+    <button onclick="share()">Share</button>
+</div>
+
+<!-- SETTINGS -->
+<div id="settings" class="hidden">
+
+    <div class="card">
+        <h3>Settings</h3>
+
+        <label>Region Code</label>
+        <input id="region" />
+
+        <label>Electricity Product</label>
+        <input id="elecProduct" />
+
+        <label>Gas Product</label>
+        <input id="gasProduct" />
+
+        <button onclick="saveSettings()">Save</button>
+        <button onclick="resetSettings()">Reset</button>
+    </div>
+
+</div>
+
+</div>
+
+<script>
+const DEFAULT = {
+    region: "L",
+    electricityProduct: "SILVER-25-09-02",
+    gasProduct: "SILVER-24-12-31"
+};
+
+let settings = loadSettings();
+
+function loadSettings() {
+    const saved = JSON.parse(localStorage.getItem("tracker")) || {};
+    const url = new URLSearchParams(location.search);
+
+    return {
+        region: url.get("region") || saved.region || DEFAULT.region,
+        electricityProduct: url.get("elec") || saved.electricityProduct || DEFAULT.electricityProduct,
+        gasProduct: url.get("gas") || saved.gasProduct || DEFAULT.gasProduct
+    };
+}
+
+function saveSettings() {
+    settings = {
+        region: region.value,
+        electricityProduct: elecProduct.value,
+        gasProduct: gasProduct.value
+    };
+
+    localStorage.setItem("tracker", JSON.stringify(settings));
+    alert("Saved");
+    showPage("dashboard");
+    refresh();
+}
+
+function resetSettings() {
+    localStorage.removeItem("tracker");
+    settings = DEFAULT;
+    fillSettings();
+    refresh();
+}
+
+function fillSettings() {
+    region.value = settings.region;
+    elecProduct.value = settings.electricityProduct;
+    gasProduct.value = settings.gasProduct;
+}
+
+function showPage(page) {
+    dashboard.classList.toggle("hidden", page !== "dashboard");
+    settings.classList.toggle("hidden", page !== "settings");
+
+    if (page === "settings") fillSettings();
+}
+
+async function fetchData(type, product) {
+
+    const today = new Date();
+    const tomorrow = new Date(Date.now() + 86400000);
+
+    const format = d =>
+        `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+
+    const base =
+        `https://api.octopus.energy/v1/products/${product}/`;
+
+    const tariff =
+        `${type}-tariffs/${type[0].toUpperCase()}-1R-${product}-${settings.region}`;
+
+    const urlToday =
+        `${base}${tariff}/standard-unit-rates/?period_from=${format(today)}T01:00:00Z&period_to=${format(today)}T22:59:59Z`;
+
+    const urlTomorrow =
+        `${base}${tariff}/standard-unit-rates/?period_from=${format(tomorrow)}T01:00:00Z&period_to=${format(tomorrow)}T22:59:59Z`;
+
+    try {
+        const t = await fetch(urlToday).then(r => r.json());
+        const tm = await fetch(urlTomorrow).then(r => r.json());
+
+        return {
+            today: t.results?.[0]?.value_inc_vat?.toFixed(2) || "N/A",
+            tomorrow: tm.results?.[0]?.value_inc_vat?.toFixed(2) || "N/A"
+        };
+
+    } catch (e) {
+        return { today: "N/A", tomorrow: "N/A" };
+    }
+}
+
+async function refresh() {
+
+    const elec = await fetchData("electricity", settings.electricityProduct);
+    const gas = await fetchData("gas", settings.gasProduct);
+
+    elecPrice.textContent = elec.today + "p";
+    gasPrice.textContent = gas.today + "p";
+
+    elecTomorrow.textContent = "Tmrw: " + elec.tomorrow + "p";
+    gasTomorrow.textContent = "Tmrw: " + gas.tomorrow + "p";
+}
+
+function share() {
+    const url =
+        `${location.origin}${location.pathname}?region=${settings.region}&elec=${settings.electricityProduct}&gas=${settings.gasProduct}`;
+
+    navigator.clipboard.writeText(url);
+    alert("Share link copied");
+}
+
+// init
+fillSettings();
+refresh();
+
+// PWA service worker
+if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("service-worker.js");
+}
+</script>
+
+</body>
+</html>
