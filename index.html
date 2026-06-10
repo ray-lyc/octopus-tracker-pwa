@@ -135,7 +135,7 @@ const DEFAULT = {
     gasProduct: "SILVER-24-12-31"
 };
 
-let settings = loadSettings();
+let appSettings = loadSettings();
 
 function loadSettings() {
     const saved = JSON.parse(localStorage.getItem("tracker")) || {};
@@ -149,13 +149,13 @@ function loadSettings() {
 }
 
 function saveSettings() {
-    settings = {
+    appSettings = {
         region: region.value,
         electricityProduct: elecProduct.value,
         gasProduct: gasProduct.value
     };
 
-    localStorage.setItem("tracker", JSON.stringify(settings));
+    localStorage.setItem("tracker", JSON.stringify(appSettings));
     alert("Saved");
     showPage("dashboard");
     refresh();
@@ -163,20 +163,25 @@ function saveSettings() {
 
 function resetSettings() {
     localStorage.removeItem("tracker");
-    settings = DEFAULT;
+    appSettings = DEFAULT;
     fillSettings();
     refresh();
 }
 
 function fillSettings() {
-    region.value = settings.region;
-    elecProduct.value = settings.electricityProduct;
-    gasProduct.value = settings.gasProduct;
+    region.value = appSettings.region;
+    elecProduct.value = appSettings.electricityProduct;
+    gasProduct.value = appSettings.gasProduct;
 }
 
+const settingsPage = document.getElementById("settings");
+const dashboardPage = document.getElementById("dashboard");
+
 function showPage(page) {
-    dashboard.classList.toggle("hidden", page !== "dashboard");
-    settings.classList.toggle("hidden", page !== "settings");
+
+    dashboardPage.classList.toggle("hidden", page !== "dashboard");
+
+    settingsPage.classList.toggle("hidden", page !== "settings");
 
     if (page === "settings") fillSettings();
 }
@@ -193,7 +198,7 @@ async function fetchData(type, product) {
         `https://api.octopus.energy/v1/products/${product}/`;
 
     const tariff =
-        `${type}-tariffs/${type[0].toUpperCase()}-1R-${product}-${settings.region}`;
+        `${type}-tariffs/${type[0].toUpperCase()}-1R-${product}-${appSettings.region}`;
 
     const urlToday =
         `${base}${tariff}/standard-unit-rates/?period_from=${format(today)}T01:00:00Z&period_to=${format(today)}T22:59:59Z`;
@@ -217,8 +222,8 @@ async function fetchData(type, product) {
 
 async function refresh() {
 
-    const elec = await fetchData("electricity", settings.electricityProduct);
-    const gas = await fetchData("gas", settings.gasProduct);
+    const elec = await fetchData("electricity", appSettings.electricityProduct);
+    const gas = await fetchData("gas", appSettings.gasProduct);
 
     elecPrice.textContent = elec.today + "p";
     gasPrice.textContent = gas.today + "p";
@@ -229,7 +234,7 @@ async function refresh() {
 
 function share() {
     const url =
-        `${location.origin}${location.pathname}?region=${settings.region}&elec=${settings.electricityProduct}&gas=${settings.gasProduct}`;
+        `${location.origin}${location.pathname}?region=${appSettings.region}&elec=${appSettings.electricityProduct}&gas=${appSettings.gasProduct}`;
 
     navigator.clipboard.writeText(url);
     alert("Share link copied");
