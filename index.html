@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<title>Octopus Tariff</title>
+<title>Octopus Tracker</title>
 
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 
@@ -73,13 +73,44 @@ input {
     display: flex;
     gap: 8px;
 }
+
+/* Forces the input text to match mobile threshold standard */
+@media screen and (max-width: 768px) {
+    input, select, textarea {
+        font-size: 16px !important;
+    }
+}
+
+.update-banner {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #333;
+    color: #fff;
+    padding: 15px 25px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    z-index: 10000;
+}
+.update-banner button {
+    background: #ff5252;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+}
 </style>
 </head>
 
 <body>
 
 <header>
-    <div>Octopus Tariff</div>
+    <div>Octopus Tracker</div>
     <div class="nav">
         <button onclick="showPage('dashboard')">Home</button>
         <button onclick="showPage('settings')">Settings</button>
@@ -215,6 +246,28 @@ function showPage(page) {
     if (page === "settings") fillSettings();
 }
 
+addDropdownListeners("region");
+addDropdownListeners("elecProduct");
+addDropdownListeners("gasProduct");
+
+function addDropdownListeners(elementId) {
+    const trackingInput = document.getElementById(elementId); 
+
+    if (trackingInput) {
+        trackingInput.addEventListener('focus', function() {
+            this.dataset.oldValue = this.value; 
+            this.value = ''; // Temporarily blank out so the full list pops up
+        });
+
+        trackingInput.addEventListener('blur', function() {
+            // If they click away without picking a new option, restore what was there
+            if (!this.value && this.dataset.oldValue) {
+                this.value = this.dataset.oldValue;
+            }
+        });
+    }
+}
+
 async function fetchData(type, product) {
 
     const today = new Date();
@@ -256,12 +309,20 @@ async function refresh() {
     currentRegion.textContent = "Region: " + regionElement.textContent;
 
     const elecElement = document.querySelector(`#product-list option[value="${appSettings.electricityProduct}"]`);
-//    const currentElecProduct = document.getElementById('currentElecProduct');
-    currentElecProduct.textContent = `(${elecElement.textContent})`;
+    if (!elecElement.textContent.trim()) {
+        currentElecProduct.textContent = `(${appSettings.electricityProduct})`;
+    }
+    else {
+        currentElecProduct.textContent = `(${elecElement.textContent})`;
+    }
 
     const gasElement = document.querySelector(`#product-list option[value="${appSettings.gasProduct}"]`);
-//    const currentGasProduct = document.getElementById('currentGasProduct');
-    currentGasProduct.textContent = `(${gasElement.textContent})`;
+    if (!gasElement.textContent.trim()) {
+        currentGasProduct.textContent = `(${appSettings.gasProduct})`;
+    }
+    else {
+        currentGasProduct.textContent = `(${gasElement.textContent})`;
+    }
 
     const elec = await fetchData("electricity", appSettings.electricityProduct);
     const gas = await fetchData("gas", appSettings.gasProduct);
@@ -289,7 +350,51 @@ refresh();
 if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("service-worker.js");
 }
-</script>
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('service-worker.js')
+            .then((registration) => {
+                
+                // Check for updates on page load
+                registration.addEventListener('updatefound', () => {
+                    const newWorker = registration.installing;
+                    
+                    newWorker.addEventListener('statechange', () => {
+                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                            // A new service worker is available! Show your UI banner here.
+                            showUpdateBanner(newWorker);
+                        }
+                    });
+                });
+                
+            });
+    });
+
+    // Reload the page automatically once the new service worker takes control
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!refreshing) {
+            window.location.reload();
+            refreshing = true;
+        }
+    });
+}
+
+function showUpdateBanner(worker) {
+    // Create a visual banner or alert
+    const banner = document.createElement('div');
+    banner.className = 'update-banner';
+    banner.innerHTML = `
+        <p>A new version is available!</p>
+        <button id="update-btn">Update Now</button>
+    `;
+    document.body.appendChild(banner);
+
+    document.getElementById('update-btn').addEventListener('click', () => {
+        // Tell the waiting service worker to take over
+        worker.postMessage({ type: 'SKIP_WAITING' });
+    });
+}</script>
 
 </body>
 </html>

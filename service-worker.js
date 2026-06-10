@@ -17,3 +17,9 @@ self.addEventListener("fetch", e => {
     caches.match(e.request).then(r => r || fetch(e.request))
   );
 });
+
+self.addEventListener('message', e => {
+    if (e.data && e.data.type === 'SKIP_WAITING') {
+        self.skipWaiting();
+    }
+});
