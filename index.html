@@ -1,400 +1,411 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<title>Octopus Tracker</title>
+    <title>Octopus Tracker</title>
 
-<link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
 
-<link rel="manifest" href="manifest.json">
+    <link rel="manifest" href="manifest.json">
 
-<meta name="theme-color" content="#100030">
+    <meta name="theme-color" content="#100030">
 
-<style>
-body {
-    margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-    background: #100030;
-    color: white;
-}
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #100030;
+            color: white;
+        }
 
-header {
-    padding: 16px;
-    font-size: 18px;
-    font-weight: bold;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
+        header {
+            padding: 16px;
+            font-size: 18px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-button {
-    background: #2a1b5a;
-    border: none;
-    color: white;
-    padding: 8px 10px;
-    border-radius: 8px;
-}
+        button {
+            background: #2a1b5a;
+            border: none;
+            color: white;
+            padding: 8px 10px;
+            border-radius: 8px;
+        }
 
-.container {
-    padding: 16px;
-}
+        .container {
+            padding: 16px;
+        }
 
-.card {
-    background: #1b1040;
-    padding: 16px;
-    border-radius: 12px;
-    margin-bottom: 12px;
-}
+        .card {
+            background: #1b1040;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+        }
 
-.price {
-    font-size: 32px;
-    font-weight: bold;
-}
+        .price {
+            font-size: 32px;
+            font-weight: bold;
+        }
 
-.small {
-    font-size: 13px;
-    opacity: 0.8;
-}
+        .small {
+            font-size: 13px;
+            opacity: 0.8;
+        }
 
-input {
-    width: 100%;
-    padding: 10px;
-    margin-top: 6px;
-    margin-bottom: 12px;
-    border-radius: 8px;
-    border: none;
-}
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 6px;
+            margin-bottom: 12px;
+            border-radius: 8px;
+            border: none;
+        }
 
-.hidden { display: none; }
+        .hidden {
+            display: none;
+        }
 
-.nav {
-    display: flex;
-    gap: 8px;
-}
+        .nav {
+            display: flex;
+            gap: 8px;
+        }
 
-/* Forces the input text to match mobile threshold standard */
-@media screen and (max-width: 768px) {
-    input, select, textarea {
-        font-size: 16px !important;
-    }
-}
+        /* Forces the input text to match mobile threshold standard */
+        @media screen and (max-width: 768px) {
 
-.update-banner {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #333;
-    color: #fff;
-    padding: 15px 25px;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    z-index: 10000;
-}
-.update-banner button {
-    background: #ff5252;
-    color: white;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-}
-</style>
+            input,
+            select,
+            textarea {
+                font-size: 16px !important;
+            }
+        }
+
+        .update-banner {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: #fff;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 10000;
+        }
+
+        .update-banner button {
+            background: #ff5252;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 
 <body>
 
-<header>
-    <div>Octopus Tracker</div>
-    <div class="nav">
-        <button onclick="showPage('dashboard')">Home</button>
-        <button onclick="showPage('settings')">Settings</button>
+    <header>
+        <div>Octopus Tracker</div>
+        <div class="nav">
+            <button onclick="showPage('dashboard')">Home</button>
+            <button onclick="showPage('settings')">Settings</button>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <!-- DASHBOARD -->
+        <div id="dashboard">
+            <h5 id="currentRegion"></h5>
+
+            <div class="card">
+                <div>⚡ Electricity <span id="currentElecProduct"></span></div>
+                <div class="price" id="elecPrice">-</div>
+                <div class="small" id="elecTomorrow"></div>
+            </div>
+
+            <div class="card">
+                <div>🔥 Gas <span id="currentGasProduct"></span></div>
+                <div class="price" id="gasPrice">-</div>
+                <div class="small" id="gasTomorrow"></div>
+            </div>
+
+            <button onclick="refresh()">Refresh</button>
+            <button onclick="share()">Share</button>
+        </div>
+
+        <!-- SETTINGS -->
+        <div id="settings" class="hidden">
+
+            <div class="card">
+                <h3>Settings</h3>
+
+                <label>Region Code</label>
+                <input id="region" list="region-list" />
+
+                <datalist id="region-list">
+                    <option value="A">A – Eastern England</option>
+                    <option value="B">B – East Midlands</option>
+                    <option value="C">C – London</option>
+                    <option value="D">D – Merseyside and Northern Wales</option>
+                    <option value="E">E – West Midlands</option>
+                    <option value="F">F – North Eastern England</option>
+                    <option value="G">G – North Western England</option>
+                    <option value="H">H – Southern England</option>
+                    <option value="J">J – South Eastern England</option>
+                    <option value="K">K – Southern Wales</option>
+                    <option value="L">L – South Western England</option>
+                    <option value="M">M – Yorkshire</option>
+                    <option value="N">N – Southern Scotland</option>
+                    <option value="P">P – Northern Scotland</option>
+                </datalist>
+
+                <label>Electricity Product</label>
+                <input id="elecProduct" list="product-list" />
+
+                <label>Gas Product</label>
+                <input id="gasProduct" list="product-list" />
+
+                <datalist id="product-list">
+                    <option value="SILVER-26-04-01">
+                    <option value="OE-FIX-12M-26-03-03">12M Fixed March 2026 v1</option>
+                    <option value="SILVER-25-09-02">Tracker September 2025v1</option>
+                    <option value="SILVER-25-04-15">
+                    <option value="SILVER-25-04-11">
+                    <option value="SILVER-24-12-31">
+                </datalist>
+
+                <button onclick="saveSettings()">Save</button>
+                <button onclick="resetSettings()">Reset</button>
+            </div>
+
+        </div>
+
     </div>
-</header>
 
-<div class="container">
-
-<!-- DASHBOARD -->
-<div id="dashboard">
-    <h5 id="currentRegion"></h5>
-
-    <div class="card">
-        <div>⚡ Electricity <span id="currentElecProduct"></span></div>
-        <div class="price" id="elecPrice">-</div>
-        <div class="small" id="elecTomorrow"></div>
-    </div>
-
-    <div class="card">
-        <div>🔥 Gas <span id="currentGasProduct"></span></div>
-        <div class="price" id="gasPrice">-</div>
-        <div class="small" id="gasTomorrow"></div>
-    </div>
-
-    <button onclick="refresh()">Refresh</button>
-    <button onclick="share()">Share</button>
-</div>
-
-<!-- SETTINGS -->
-<div id="settings" class="hidden">
-
-    <div class="card">
-        <h3>Settings</h3>
-
-        <label>Region Code</label>
-        <input id="region" list="region-list" />
-
-        <datalist id="region-list">
-            <option value="A">A – Eastern England</option>
-            <option value="B">B – East Midlands</option>
-            <option value="C">C – London</option>
-            <option value="D">D – Merseyside and Northern Wales</option>
-            <option value="E">E – West Midlands</option>
-            <option value="F">F – North Eastern England</option>
-            <option value="G">G – North Western England</option>
-            <option value="H">H – Southern England</option>
-            <option value="J">J – South Eastern England</option>
-            <option value="K">K – Southern Wales</option>
-            <option value="L">L – South Western England</option>
-            <option value="M">M – Yorkshire</option>
-            <option value="N">N – Southern Scotland</option>
-            <option value="P">P – Northern Scotland</option>
-        </datalist>
-
-        <label>Electricity Product</label>
-        <input id="elecProduct" list="product-list" />
-
-        <label>Gas Product</label>
-        <input id="gasProduct" list="product-list" />
-
-        <datalist id="product-list">
-            <option value="SILVER-26-04-01">
-            <option value="OE-FIX-12M-26-03-03">12M Fixed March 2026 v1</option>
-            <option value="SILVER-25-09-02">Tracker September 2025v1</option>
-            <option value="SILVER-25-04-15">
-            <option value="SILVER-25-04-11">
-            <option value="SILVER-24-12-31">
-        </datalist>
-
-        <button onclick="saveSettings()">Save</button>
-        <button onclick="resetSettings()">Reset</button>
-    </div>
-
-</div>
-
-</div>
-
-<script>
-const DEFAULT = {
-    region: "L",
-    electricityProduct: "SILVER-25-09-02",
-    gasProduct: "SILVER-24-12-31"
-};
-
-let appSettings = loadSettings();
-
-function loadSettings() {
-    const saved = JSON.parse(localStorage.getItem("tracker")) || {};
-    const url = new URLSearchParams(location.search);
-
-    return {
-        region: url.get("region") || saved.region || DEFAULT.region,
-        electricityProduct: url.get("elec") || saved.electricityProduct || DEFAULT.electricityProduct,
-        gasProduct: url.get("gas") || saved.gasProduct || DEFAULT.gasProduct
-    };
-}
-
-function saveSettings() {
-    appSettings = {
-        region: region.value,
-        electricityProduct: elecProduct.value,
-        gasProduct: gasProduct.value
-    };
-
-    localStorage.setItem("tracker", JSON.stringify(appSettings));
-    alert("Saved");
-    showPage("dashboard");
-    refresh();
-}
-
-function resetSettings() {
-    localStorage.removeItem("tracker");
-    appSettings = DEFAULT;
-    fillSettings();
-    refresh();
-}
-
-function fillSettings() {
-    region.value = appSettings.region;
-    elecProduct.value = appSettings.electricityProduct;
-    gasProduct.value = appSettings.gasProduct;
-}
-
-const settingsPage = document.getElementById("settings");
-const dashboardPage = document.getElementById("dashboard");
-
-function showPage(page) {
-
-    dashboardPage.classList.toggle("hidden", page !== "dashboard");
-
-    settingsPage.classList.toggle("hidden", page !== "settings");
-
-    if (page === "settings") fillSettings();
-}
-
-addDropdownListeners("region");
-addDropdownListeners("elecProduct");
-addDropdownListeners("gasProduct");
-
-function addDropdownListeners(elementId) {
-    const trackingInput = document.getElementById(elementId); 
-
-    if (trackingInput) {
-        trackingInput.addEventListener('focus', function() {
-            this.dataset.oldValue = this.value; 
-            this.value = ''; // Temporarily blank out so the full list pops up
-        });
-
-        trackingInput.addEventListener('blur', function() {
-            // If they click away without picking a new option, restore what was there
-            if (!this.value && this.dataset.oldValue) {
-                this.value = this.dataset.oldValue;
-            }
-        });
-    }
-}
-
-async function fetchData(type, product) {
-
-    const today = new Date();
-    const tomorrow = new Date(Date.now() + 86400000);
-
-    const format = d =>
-        `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-
-    const base =
-        `https://api.octopus.energy/v1/products/${product}/`;
-
-    const tariff =
-        `${type}-tariffs/${type[0].toUpperCase()}-1R-${product}-${appSettings.region}`;
-
-    const urlToday =
-        `${base}${tariff}/standard-unit-rates/?period_from=${format(today)}T01:00:00Z&period_to=${format(today)}T22:59:59Z`;
-
-    const urlTomorrow =
-        `${base}${tariff}/standard-unit-rates/?period_from=${format(tomorrow)}T01:00:00Z&period_to=${format(tomorrow)}T22:59:59Z`;
-
-    try {
-        const t = await fetch(urlToday).then(r => r.json());
-        const tm = await fetch(urlTomorrow).then(r => r.json());
-
-        return {
-            today: t.results?.[0]?.value_inc_vat?.toFixed(2) || "N/A",
-            tomorrow: tm.results?.[0]?.value_inc_vat?.toFixed(2) || "N/A"
+    <script>
+        const DEFAULT = {
+            region: "L",
+            electricityProduct: "SILVER-25-09-02",
+            gasProduct: "SILVER-24-12-31"
         };
 
-    } catch (e) {
-        return { today: "N/A", tomorrow: "N/A" };
-    }
-}
+        let appSettings = loadSettings();
 
+        function loadSettings() {
+            const saved = JSON.parse(localStorage.getItem("tracker")) || {};
+            const url = new URLSearchParams(location.search);
 
-async function refresh() {
-
-    const regionElement = document.querySelector(`#region-list option[value="${appSettings.region}"]`);
-    currentRegion.textContent = "Region: " + regionElement.textContent;
-
-    const elecElement = document.querySelector(`#product-list option[value="${appSettings.electricityProduct}"]`);
-    if (!elecElement.textContent.trim()) {
-        currentElecProduct.textContent = `(${appSettings.electricityProduct})`;
-    }
-    else {
-        currentElecProduct.textContent = `(${elecElement.textContent})`;
-    }
-
-    const gasElement = document.querySelector(`#product-list option[value="${appSettings.gasProduct}"]`);
-    if (!gasElement.textContent.trim()) {
-        currentGasProduct.textContent = `(${appSettings.gasProduct})`;
-    }
-    else {
-        currentGasProduct.textContent = `(${gasElement.textContent})`;
-    }
-
-    const elec = await fetchData("electricity", appSettings.electricityProduct);
-    const gas = await fetchData("gas", appSettings.gasProduct);
-
-    elecPrice.textContent = elec.today + "p";
-    gasPrice.textContent = gas.today + "p";
-
-    elecTomorrow.textContent = "Tmrw: " + elec.tomorrow + "p";
-    gasTomorrow.textContent = "Tmrw: " + gas.tomorrow + "p";
-}
-
-function share() {
-    const url =
-        `${location.origin}${location.pathname}?region=${appSettings.region}&elec=${appSettings.electricityProduct}&gas=${appSettings.gasProduct}`;
-
-    navigator.clipboard.writeText(url);
-    alert("Share link copied");
-}
-
-// init
-fillSettings();
-refresh();
-
-// PWA service worker
-if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("service-worker.js");
-}
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('service-worker.js')
-            .then((registration) => {
-                
-                // Check for updates on page load
-                registration.addEventListener('updatefound', () => {
-                    const newWorker = registration.installing;
-                    
-                    newWorker.addEventListener('statechange', () => {
-                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                            // A new service worker is available! Show your UI banner here.
-                            showUpdateBanner(newWorker);
-                        }
-                    });
-                });
-                
-            });
-    });
-
-    // Reload the page automatically once the new service worker takes control
-    let refreshing = false;
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-        if (!refreshing) {
-            window.location.reload();
-            refreshing = true;
+            return {
+                region: url.get("region") || saved.region || DEFAULT.region,
+                electricityProduct: url.get("elec") || saved.electricityProduct || DEFAULT.electricityProduct,
+                gasProduct: url.get("gas") || saved.gasProduct || DEFAULT.gasProduct
+            };
         }
-    });
-}
 
-function showUpdateBanner(worker) {
-    // Create a visual banner or alert
-    const banner = document.createElement('div');
-    banner.className = 'update-banner';
-    banner.innerHTML = `
+        function saveSettings() {
+            appSettings = {
+                region: region.value,
+                electricityProduct: elecProduct.value,
+                gasProduct: gasProduct.value
+            };
+
+            localStorage.setItem("tracker", JSON.stringify(appSettings));
+            alert("Saved");
+            showPage("dashboard");
+            refresh();
+        }
+
+        function resetSettings() {
+            localStorage.removeItem("tracker");
+            appSettings = DEFAULT;
+            fillSettings();
+            refresh();
+        }
+
+        function fillSettings() {
+            region.value = appSettings.region;
+            elecProduct.value = appSettings.electricityProduct;
+            gasProduct.value = appSettings.gasProduct;
+        }
+
+        const settingsPage = document.getElementById("settings");
+        const dashboardPage = document.getElementById("dashboard");
+
+        function showPage(page) {
+
+            dashboardPage.classList.toggle("hidden", page !== "dashboard");
+
+            settingsPage.classList.toggle("hidden", page !== "settings");
+
+            if (page === "settings") fillSettings();
+        }
+
+        addDropdownListeners("region");
+        addDropdownListeners("elecProduct");
+        addDropdownListeners("gasProduct");
+
+        function addDropdownListeners(elementId) {
+            const trackingInput = document.getElementById(elementId);
+
+            if (trackingInput) {
+                trackingInput.addEventListener('focus', function () {
+                    this.dataset.oldValue = this.value;
+                    this.value = ''; // Temporarily blank out so the full list pops up
+                });
+
+                trackingInput.addEventListener('blur', function () {
+                    // If they click away without picking a new option, restore what was there
+                    if (!this.value && this.dataset.oldValue) {
+                        this.value = this.dataset.oldValue;
+                    }
+                });
+            }
+        }
+
+        async function fetchData(type, product) {
+
+            const today = new Date();
+            const tomorrow = new Date(Date.now() + 86400000);
+
+            const format = d =>
+                `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+            const base =
+                `https://api.octopus.energy/v1/products/${product}/`;
+
+            const tariff =
+                `${type}-tariffs/${type[0].toUpperCase()}-1R-${product}-${appSettings.region}`;
+
+            const urlToday =
+                `${base}${tariff}/standard-unit-rates/?period_from=${format(today)}T01:00:00Z&period_to=${format(today)}T22:59:59Z`;
+
+            const urlTomorrow =
+                `${base}${tariff}/standard-unit-rates/?period_from=${format(tomorrow)}T01:00:00Z&period_to=${format(tomorrow)}T22:59:59Z`;
+
+            try {
+                const t = await fetch(urlToday).then(r => r.json());
+                const tm = await fetch(urlTomorrow).then(r => r.json());
+
+                return {
+                    today: t.results?.[0]?.value_inc_vat?.toFixed(2) || "N/A",
+                    tomorrow: tm.results?.[0]?.value_inc_vat?.toFixed(2) || "N/A"
+                };
+
+            } catch (e) {
+                return { today: "N/A", tomorrow: "N/A" };
+            }
+        }
+
+        async function refresh() {
+
+            const regionElement = document.querySelector(`#region-list option[value="${appSettings.region}"]`);
+            currentRegion.textContent = "Region: " + regionElement.textContent;
+
+            await displayTariffData("electricity", appSettings.electricityProduct, currentElecProduct, elecPrice, elecTomorrow);
+            await displayTariffData("gas", appSettings.gasProduct, currentGasProduct, gasPrice, gasTomorrow);
+        }
+
+        async function displayTariffData(productType, product, currentProductTextTag, priceTag, tomorrowTag) {
+
+            const element = document.querySelector(`#product-list option[value="${product}"]`);
+            if (!element.textContent.trim()) {
+                currentProductTextTag.textContent = `(${product})`;
+            }
+            else {
+                currentProductTextTag.textContent = `(${element.textContent})`;
+            }
+
+            const productData = await fetchData(productType, product);
+
+            priceTag.textContent = productData.today + "p";
+
+            if (productData.tomorrow && productData.tomorrow !== "N/A") {
+                let change = productData.today && productData.today !== "N/A" ? ((parseFloat(productData.tomorrow) - parseFloat(productData.today)) / parseFloat(productData.today)) * 100 : 0;
+                let percentageChange = Math.abs(change).toFixed(2) + "%";
+                let arrow = change > 0 ? "↑" : (change < 0 ? "↓" : "");
+
+                tomorrowTag.textContent = `Tmrw: ${productData.tomorrow}p (${percentageChange}${arrow})`;
+            }
+            else {
+                tomorrowTag.textContent = "Tmrw: Coming Soon";
+            }
+        }
+
+        function share() {
+            const url =
+                `${location.origin}${location.pathname}?region=${appSettings.region}&elec=${appSettings.electricityProduct}&gas=${appSettings.gasProduct}`;
+
+            navigator.clipboard.writeText(url);
+            alert("Share link copied");
+        }
+
+        // init
+        fillSettings();
+        refresh();
+
+        // PWA service worker
+        if ("serviceWorker" in navigator) {
+            navigator.serviceWorker.register("service-worker.js");
+        }
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then((registration) => {
+
+                        // Check for updates on page load
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // A new service worker is available! Show your UI banner here.
+                                    showUpdateBanner(newWorker);
+                                }
+                            });
+                        });
+
+                    });
+            });
+
+            // Reload the page automatically once the new service worker takes control
+            let refreshing = false;
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (!refreshing) {
+                    window.location.reload();
+                    refreshing = true;
+                }
+            });
+        }
+
+        function showUpdateBanner(worker) {
+            // Create a visual banner or alert
+            const banner = document.createElement('div');
+            banner.className = 'update-banner';
+            banner.innerHTML = `
         <p>A new version is available!</p>
         <button id="update-btn">Update Now</button>
     `;
-    document.body.appendChild(banner);
+            document.body.appendChild(banner);
 
-    document.getElementById('update-btn').addEventListener('click', () => {
-        // Tell the waiting service worker to take over
-        worker.postMessage({ type: 'SKIP_WAITING' });
-    });
-}</script>
+            document.getElementById('update-btn').addEventListener('click', () => {
+                // Tell the waiting service worker to take over
+                worker.postMessage({ type: 'SKIP_WAITING' });
+            });
+        }</script>
 
 </body>
+
 </html>
