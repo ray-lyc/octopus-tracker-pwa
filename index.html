@@ -142,6 +142,8 @@
                 <div class="small" id="gasTomorrow"></div>
             </div>
 
+            <div id="updateTime" style="margin-bottom: 12px;"></div>
+
             <button onclick="refresh()">Refresh</button>
             <button onclick="share()">Share</button>
         </div>
@@ -342,6 +344,30 @@
             else {
                 tomorrowTag.textContent = "Tmrw: Coming Soon";
             }
+
+            updateTime.textContent = "Update time: " + getLocalTimestampString();
+        }
+
+        function getLocalTimestampString() {
+              const now = new Date();
+
+              // 1. Manually format YYYY-MM-DD HH:mm to ensure exact order and padding
+              const year = now.getFullYear();
+              const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+              const day = String(now.getDate()).padStart(2, '0');
+              const hours = String(now.getHours()).padStart(2, '0');
+              const minutes = String(now.getMinutes()).padStart(2, '0');
+
+              const dateTimePart = `${year}-${month}-${day} ${hours}:${minutes}`;
+
+              // 2. Get the timezone abbreviation (e.g., "BST", "GMT")
+              // Uses the system's local timezone automatically
+              const timeZoneName = new Intl.DateTimeFormat('en-GB', {
+                timeZoneName: 'short'
+              }).formatToParts(now).find(part => part.type === 'timeZoneName')?.value || '';
+
+              // 3. Combine parts
+              return `${dateTimePart} ${timeZoneName}`;
         }
 
         function share() {
