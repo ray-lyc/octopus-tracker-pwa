@@ -133,16 +133,22 @@
             <div class="card">
                 <div>⚡ Electricity <span id="currentElecProduct"></span></div>
                 <div class="price" id="elecPrice">-</div>
-                <div class="small" id="elecTomorrow"></div>
+                <div class="small" style="display: flex;">
+                    <span id="elecTomorrow"></span>
+                    &nbsp;<span id="elecChg"></span>
+                </div>
             </div>
 
             <div class="card">
                 <div>🔥 Gas <span id="currentGasProduct"></span></div>
                 <div class="price" id="gasPrice">-</div>
-                <div class="small" id="gasTomorrow"></div>
+                <div class="small" style="display: flex;">
+                    <span id="gasTomorrow"></span>
+                    &nbsp;<span id="gasChg"></span>
+                </div>
             </div>
 
-            <div id="updateTime" style="margin-bottom: 12px;"></div>
+            <div class="small" id="updateTime" style="margin-bottom: 12px;"></div>
 
             <button onclick="refresh()">Refresh</button>
             <button onclick="share()">Share</button>
@@ -187,6 +193,7 @@
                     <option value="SILVER-25-04-15">
                     <option value="SILVER-25-04-11">
                     <option value="SILVER-24-12-31">
+                    <option value="VAR-22-11-01">Flexible Octopus</option>
                 </datalist>
 
                 <button onclick="saveSettings()">Save</button>
@@ -316,11 +323,11 @@
             const regionElement = document.querySelector(`#region-list option[value="${appSettings.region}"]`);
             currentRegion.textContent = "Region: " + regionElement.textContent;
 
-            await displayTariffData("electricity", appSettings.electricityProduct, currentElecProduct, elecPrice, elecTomorrow);
-            await displayTariffData("gas", appSettings.gasProduct, currentGasProduct, gasPrice, gasTomorrow);
+            await displayTariffData("electricity", appSettings.electricityProduct, currentElecProduct, elecPrice, elecTomorrow, elecChg);
+            await displayTariffData("gas", appSettings.gasProduct, currentGasProduct, gasPrice, gasTomorrow, gasChg);
         }
 
-        async function displayTariffData(productType, product, currentProductTextTag, priceTag, tomorrowTag) {
+        async function displayTariffData(productType, product, currentProductTextTag, priceTag, tomorrowTag, changeTag) {
 
             const element = document.querySelector(`#product-list option[value="${product}"]`);
             if (!element.textContent.trim()) {
@@ -338,8 +345,11 @@
                 let change = productData.today && productData.today !== "N/A" ? ((parseFloat(productData.tomorrow) - parseFloat(productData.today)) / parseFloat(productData.today)) * 100 : 0;
                 let percentageChange = Math.abs(change).toFixed(2) + "%";
                 let arrow = change > 0 ? "↑" : (change < 0 ? "↓" : "");
+                let changeColour = change > 0 ? "#FF3B30" : (change < 0 ? "#30D158" : "white");
 
-                tomorrowTag.textContent = `Tmrw: ${productData.tomorrow}p (${percentageChange}${arrow})`;
+                tomorrowTag.textContent = `Tmrw: ${productData.tomorrow}p`;
+                changeTag.textContent = `(${percentageChange}${arrow})`;
+                changeTag.style.color = changeColour;
             }
             else {
                 tomorrowTag.textContent = "Tmrw: Coming Soon";
